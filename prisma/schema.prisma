@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?
+  apiToken  String   @unique @default(uuid())
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  slug      String
+  content   String   @db.Text
+  imageUrl  String?
+  status    Status   @default(DRAFT)
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([clientId, slug])
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+}
